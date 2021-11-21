@@ -1,85 +1,61 @@
-function plot_turning
+function Z=plot_turning
   rng(1985)
   close all
-  n = 60; %n=20 and rnd1985 pretty good
+  n = 50; 
   d = 2;
+  tv = [0 1 2]; % Time lags
 
   figure
-
+  for s = 1:3
+    subplot(2,3,s)
+    t=tv(s);
+    plothdxt(n,t,d)
+    hold on
+    plotunitcircle()
+    axis square
+  end
   subplot(2,3,1)
-  t=0;
-  plothdxt(n,t,d)
-  hold on
-  plotunitcircle()
-  axis square
   ylabel('Covariance')
 
+
+  %% now generate a single realization for all three time lags
+  S = [];
+  mesh = [];
+  for s = 1:3
+    t = tv(s);
+    [X,Y,SS] = getcorrS(n,t,d);
+    mm = [X(:) Y(:) repmat(t,n^2,1)];
+    
+    mesh = [mesh; mm];
+    S = [S; SS(:)];
+  end
+  corr.name = 'gauss';
+  corr.c0 = [1];
+  corr.sigma=S;
+  [F,KL] = randomfield(corr,mesh,'trunc',15);
+  Z = reshape(F,n,n,3);
+
+  for s = 4:6
+    subplot(2,3,s)
+    surf(X,Y,Z(:,:,s-3))
+    hold on
+    plotunitcircle()  
+    view(2)
+    shading interp
+    if s==4
+      ca = caxis;
+    end
+    caxis(ca)
+    hold on
+    plotunitcircle()
+    axis square
+  end
+
   subplot(2,3,4)
-  [X,Y,S] = getcorrS(n,t,d);
-  mesh = [X(:) Y(:)];
-  corr.name = 'gauss';
-  corr.c0 = [1];
-  corr.sigma=S(:);
-  [F,KL] = randomfield(corr,mesh,'trunc',10);
-  surf(X,Y,reshape(F,n,n))
-  hold on
-  plotunitcircle()  
-  view(2)
-  shading interp
-  hold on
-  plotunitcircle()
-  axis square
   ylabel('Realization')
+
   
-
-  subplot(2,3,2)
-  t=1;
-  plothdxt(n,t,d)
-  hold on
-  plotunitcircle()
-  axis square
-
-  subplot(2,3,5)
-  [X,Y,S] = getcorrS(n,t,d);
-  mesh = [X(:) Y(:)];
-  corr.name = 'gauss';
-  corr.c0 = [1];
-  corr.sigma=S(:);
-  [F,KL] = randomfield(corr,mesh,'trunc',10);
-  surf(X,Y,reshape(F,n,n))
-  hold on
-  plotunitcircle()  
-  view(2)
-  shading interp
-  hold on
-  plotunitcircle()
-  axis square
-%  colorbar
-
-
-  subplot(2,3,3)
-  t=2;
-  plothdxt(n,t,d)
-  hold on
-  plotunitcircle()
-  axis square
-  
-  subplot(2,3,6)
-  [X,Y,S] = getcorrS(n,t,d);
-  mesh = [X(:) Y(:)];
-  corr.name = 'gauss';
-  corr.c0 = [1];
-  corr.sigma=S(:);
-  [F,KL] = randomfield(corr,mesh,'trunc',10);
-  surf(X,Y,reshape(F,n,n))
-  hold on
-  plotunitcircle()  
-  view(2)
-  shading interp
-  hold on
-  plotunitcircle()
-  axis square
-  
+  return
   
   function plotunitcircle()
     th = 0:.01:2*pi;
