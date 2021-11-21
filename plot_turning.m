@@ -53,6 +53,10 @@ function Z=plot_turning
 
   subplot(2,3,4)
   ylabel('Realization')
+  
+  saveas(gcf,'R2example','png')
+  saveas(gcf,'R2example','epsc')
+
 
   
   return
